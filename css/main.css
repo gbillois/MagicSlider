@@ -565,13 +565,104 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
 
 @media (max-width: 980px) {
   body { overflow: auto; }
-  .app-shell { min-height: 100vh; height: auto; }
-  .topbar { grid-template-columns: 1fr; height: auto; padding: 10px 12px; }
+  .app-shell {
+    min-height: 100vh;
+    height: auto;
+    grid-template-rows: auto auto;
+  }
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    grid-template-columns: 1fr;
+    height: auto;
+    padding: 10px 12px 8px;
+    gap: 10px;
+  }
+  .brand {
+    min-width: 0;
+  }
+  .brand-mark {
+    width: 30px;
+    height: 30px;
+  }
+  .brand-title {
+    font-size: 14px;
+  }
+  .brand-sub {
+    font-size: 10px;
+  }
+  .tabbar {
+    width: 100%;
+    overflow-x: auto;
+    padding-bottom: 2px;
+    scrollbar-width: none;
+    -webkit-overflow-scrolling: touch;
+  }
+  .tabbar::-webkit-scrollbar {
+    display: none;
+  }
+  .tab {
+    flex: 0 0 auto;
+    min-width: 74px;
+    height: 34px;
+    padding: 0 10px;
+    font-size: 12px;
+  }
   .provider-pill { display: none; }
   .workspace, .workspace.modify, .workspace.export, .workspace.settings {
     grid-template-columns: 1fr;
     min-height: auto;
+    padding: 10px;
   }
   .panel, .stage-panel, .side-panel { min-height: 320px; }
-  .slide { width: 100%; }
+  .stage-panel {
+    min-width: 0;
+  }
+  .stage-toolbar {
+    overflow-x: auto;
+    min-height: 46px;
+  }
+  .preview-wrap, .editor-wrap {
+    justify-content: start;
+    padding: 12px;
+  }
+  .slide {
+    width: 960px;
+    height: 540px;
+  }
+}
+
+@media (max-width: 520px) {
+  .workspace, .workspace.modify, .workspace.export, .workspace.settings {
+    padding: 8px;
+    gap: 10px;
+  }
+  .field-row, .compact-grid, .tool-grid, .template-grid {
+    grid-template-columns: 1fr;
+  }
+  .panel-header {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+  .stage-toolbar {
+    gap: 6px;
+    padding: 6px 8px;
+  }
+  .stage-toolbar .spacer {
+    display: none;
+  }
+  .btn {
+    min-height: 34px;
+    padding: 0 10px;
+    font-size: 11px;
+  }
+  .toast-stack {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+  }
+  .toast {
+    max-width: none;
+  }
 }
