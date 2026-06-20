@@ -45,6 +45,8 @@
     { id: "section", name: "Section", desc: "Intercalaire fort" },
     { id: "bullets", name: "Bullets", desc: "Message et points clés" },
     { id: "two-column", name: "Two columns", desc: "Comparaison ou plan" },
+    { id: "metrics", name: "Metrics", desc: "Chiffres et preuves" },
+    { id: "cards", name: "Cards", desc: "Cartes de synthèse" },
     { id: "image", name: "Image", desc: "Visuel plein format" }
   ];
 
@@ -214,33 +216,152 @@
       notes: data.notes || "",
       elements: []
     };
+    if (Array.isArray(data.elements) && data.elements.length) {
+      slide.background = cleanGeneratedColor(data.background, "#ffffff");
+      slide.elements = data.elements.slice(0, 28).map((element, index) => generatedElement(element, index)).filter(Boolean);
+      if (slide.elements.length) {
+        slide.name = String(data.title || data.name || "Generated slide").slice(0, 48);
+        return slide;
+      }
+    }
     const title = data.title || "New slide";
     const subtitle = data.subtitle || "";
     const bullets = Array.isArray(data.bullets) ? data.bullets : [];
+    const takeaway = data.takeaway || "";
+    const metrics = Array.isArray(data.metrics) ? data.metrics.slice(0, 4) : [];
+    const cards = Array.isArray(data.cards) ? data.cards.slice(0, 6) : [];
     if (template === "title") {
+      slide.elements.push(createElement("rect", { x: 0, y: 0, w: 960, h: 540, fill: "#ffffff", stroke: "transparent", z: 1 }));
+      slide.elements.push(createElement("ellipse", { x: 650, y: -120, w: 360, h: 360, fill: "#efeaff", stroke: "transparent", opacity: 0.85, z: 2 }));
+      slide.elements.push(createElement("rect", { x: 0, y: 0, w: 10, h: 540, fill: "#04f06a", stroke: "transparent", z: 3 }));
+      slide.elements.push(createElement("text", { x: 70, y: 52, w: 180, h: 22, text: "MAGICSLIDER", color: "#6b6580", fontSize: 12, fontFamily: "Inter, Arial, sans-serif", fontWeight: 800, z: 4 }));
       slide.elements.push(createElement("text", { x: 70, y: 72, w: 780, h: 90, text: title, color: "#451dc7", fontSize: 48, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
       slide.elements.push(createElement("text", { x: 74, y: 185, w: 620, h: 110, text: subtitle || "Subtitle", color: "#4b465f", fontSize: 24, fontWeight: 500 }));
       slide.elements.push(createElement("rect", { x: 74, y: 410, w: 230, h: 18, fill: "#04f06a", stroke: "transparent" }));
+      if (takeaway) slide.elements.push(createElement("text", { x: 74, y: 448, w: 580, h: 44, text: takeaway, color: "#171321", fontSize: 17, fontWeight: 700 }));
     } else if (template === "section") {
       slide.background = "#16121f";
+      slide.elements.push(createElement("ellipse", { x: 650, y: -160, w: 420, h: 420, fill: "#2c1b66", stroke: "transparent", opacity: 0.62, z: 1 }));
+      slide.elements.push(createElement("rect", { x: 0, y: 0, w: 10, h: 540, fill: "#04f06a", stroke: "transparent", z: 2 }));
       slide.elements.push(createElement("text", { x: 80, y: 160, w: 780, h: 116, text: title, color: "#ffffff", fontSize: 54, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
       slide.elements.push(createElement("rect", { x: 80, y: 318, w: 300, h: 16, fill: "#04f06a", stroke: "transparent" }));
+      if (subtitle || takeaway) slide.elements.push(createElement("text", { x: 82, y: 356, w: 620, h: 54, text: subtitle || takeaway, color: "#cfc9ea", fontSize: 20, fontWeight: 500 }));
     } else if (template === "bullets") {
-      slide.elements.push(createElement("text", { x: 64, y: 52, w: 790, h: 70, text: title, color: "#451dc7", fontSize: 38, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
-      slide.elements.push(createElement("text", { x: 88, y: 150, w: 760, h: 260, text: (bullets.length ? bullets : ["First point", "Second point", "Third point"]).map((b) => `- ${b}`).join("\n"), color: "#171321", fontSize: 25, fontWeight: 500 }));
+      slide.elements.push(createElement("text", { x: 54, y: 42, w: 820, h: 62, text: title, color: "#451dc7", fontSize: 34, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
+      slide.elements.push(createElement("rect", { x: 54, y: 116, w: 850, h: 1, fill: "#dcd6f3", stroke: "transparent" }));
+      const list = bullets.length ? bullets.slice(0, 4) : ["First point", "Second point", "Third point"];
+      list.forEach((bullet, index) => {
+        const y = 154 + index * 74;
+        slide.elements.push(createElement("ellipse", { x: 62, y: y + 3, w: 24, h: 24, fill: index === 0 ? "#04f06a" : "#f0eef9", stroke: "#d1caf2" }));
+        slide.elements.push(createElement("text", { x: 104, y, w: 710, h: 44, text: bullet, color: "#171321", fontSize: 20, fontWeight: index === 0 ? 750 : 520 }));
+      });
+      if (takeaway) {
+        slide.elements.push(createElement("rect", { x: 54, y: 452, w: 850, h: 50, fill: "#16121f", stroke: "transparent" }));
+        slide.elements.push(createElement("text", { x: 78, y: 466, w: 790, h: 25, text: takeaway, color: "#ffffff", fontSize: 16, fontWeight: 750 }));
+      }
     } else if (template === "two-column") {
       slide.elements.push(createElement("text", { x: 60, y: 44, w: 830, h: 58, text: title, color: "#451dc7", fontSize: 36, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
       slide.elements.push(createElement("rect", { x: 66, y: 132, w: 390, h: 310, fill: "#f5f4f9", stroke: "#d1caf2" }));
       slide.elements.push(createElement("rect", { x: 504, y: 132, w: 390, h: 310, fill: "#f1ffee", stroke: "#a6faca" }));
-      slide.elements.push(createElement("text", { x: 94, y: 164, w: 320, h: 220, text: bullets.slice(0, 3).map((b) => `- ${b}`).join("\n") || "- Point A\n- Point B", fontSize: 22, fontWeight: 500 }));
-      slide.elements.push(createElement("text", { x: 532, y: 164, w: 320, h: 220, text: bullets.slice(3, 6).map((b) => `- ${b}`).join("\n") || "- Point C\n- Point D", fontSize: 22, fontWeight: 500 }));
+      slide.elements.push(createElement("text", { x: 92, y: 154, w: 320, h: 28, text: data.leftTitle || "Current reality", color: "#451dc7", fontSize: 18, fontWeight: 800 }));
+      slide.elements.push(createElement("text", { x: 532, y: 154, w: 320, h: 28, text: data.rightTitle || "Target state", color: "#16121f", fontSize: 18, fontWeight: 800 }));
+      slide.elements.push(createElement("text", { x: 94, y: 198, w: 320, h: 190, text: bullets.slice(0, 3).map((b) => `- ${b}`).join("\n") || "- Point A\n- Point B", fontSize: 19, fontWeight: 500 }));
+      slide.elements.push(createElement("text", { x: 532, y: 198, w: 320, h: 190, text: bullets.slice(3, 6).map((b) => `- ${b}`).join("\n") || "- Point C\n- Point D", fontSize: 19, fontWeight: 500 }));
     } else if (template === "image") {
       slide.elements.push(createElement("rect", { x: 0, y: 0, w: 960, h: 540, fill: "#16121f", stroke: "transparent" }));
+      slide.elements.push(createElement("ellipse", { x: 540, y: -80, w: 420, h: 420, fill: "#451dc7", stroke: "transparent", opacity: 0.55 }));
+      slide.elements.push(createElement("rect", { x: 640, y: 88, w: 210, h: 280, fill: "#04f06a", stroke: "transparent", opacity: 0.95 }));
       slide.elements.push(createElement("text", { x: 68, y: 330, w: 700, h: 96, text: title, color: "#ffffff", fontSize: 44, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
       slide.elements.push(createElement("text", { x: 72, y: 430, w: 560, h: 48, text: subtitle, color: "#dfe7f1", fontSize: 20, fontWeight: 500 }));
+    } else if (template === "metrics") {
+      slide.elements.push(createElement("text", { x: 54, y: 42, w: 820, h: 56, text: title, color: "#451dc7", fontSize: 34, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
+      const items = metrics.length ? metrics : [{ value: "3x", label: "Signal to prove" }, { value: "45%", label: "Metric to quantify" }, { value: "90d", label: "Time horizon" }];
+      items.slice(0, 4).forEach((metric, index) => {
+        const x = 58 + index * 218;
+        slide.elements.push(createElement("rect", { x, y: 148, w: 184, h: 208, fill: index % 2 ? "#f1ffee" : "#f5f4f9", stroke: index % 2 ? "#a6faca" : "#d1caf2" }));
+        slide.elements.push(createElement("text", { x: x + 18, y: 184, w: 148, h: 58, text: String(metric.value || metric.number || ""), color: "#451dc7", fontSize: 42, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 850 }));
+        slide.elements.push(createElement("text", { x: x + 18, y: 264, w: 148, h: 58, text: String(metric.label || metric.text || ""), color: "#171321", fontSize: 15, fontWeight: 650 }));
+      });
+      if (takeaway) slide.elements.push(createElement("text", { x: 60, y: 420, w: 780, h: 48, text: takeaway, color: "#4b465f", fontSize: 18, fontWeight: 650 }));
+    } else if (template === "cards") {
+      slide.elements.push(createElement("text", { x: 54, y: 42, w: 820, h: 56, text: title, color: "#451dc7", fontSize: 34, fontFamily: "Poppins, Inter, sans-serif", fontWeight: 800 }));
+      const items = cards.length ? cards : bullets.map((b) => ({ title: b, body: "" })).slice(0, 4);
+      items.slice(0, 4).forEach((card, index) => {
+        const x = 58 + (index % 2) * 430;
+        const y = 138 + Math.floor(index / 2) * 150;
+        slide.elements.push(createElement("rect", { x, y, w: 390, h: 118, fill: "#ffffff", stroke: "#dfe4ee" }));
+        slide.elements.push(createElement("rect", { x, y, w: 8, h: 118, fill: index % 2 ? "#451dc7" : "#04f06a", stroke: "transparent" }));
+        slide.elements.push(createElement("text", { x: x + 24, y: y + 18, w: 320, h: 26, text: String(card.title || card.label || "Key point"), color: "#171321", fontSize: 17, fontWeight: 800 }));
+        slide.elements.push(createElement("text", { x: x + 24, y: y + 54, w: 330, h: 44, text: String(card.body || card.text || ""), color: "#4b465f", fontSize: 13, fontWeight: 500 }));
+      });
     }
     slide.name = title.slice(0, 48) || slide.name;
     return slide;
+  }
+
+  function cleanGeneratedColor(value, fallback) {
+    if (!value || value === "transparent") return fallback;
+    return normalizeColor(value);
+  }
+
+  function generatedElement(input, index) {
+    const rawType = input?.type === "photo" ? "image" : input?.type;
+    const type = ["text", "rect", "ellipse", "line", "image", "icon"].includes(rawType) ? rawType : null;
+    if (!type) return null;
+    const outputType = type === "icon" ? "image" : type;
+    const element = createElement(outputType, {
+      x: clamp(input.x, 0, BASE_W - 8),
+      y: clamp(input.y, 0, BASE_H - 8),
+      w: clamp(input.w, type === "line" ? 8 : 12, BASE_W),
+      h: clamp(input.h, type === "line" ? 1 : 10, BASE_H),
+      rotate: clamp(input.rotate || 0, -180, 180),
+      opacity: clamp(input.opacity ?? 1, 0.05, 1),
+      z: Number(input.z) || index + 1
+    });
+    element.fill = input.fill === "transparent" ? "transparent" : cleanGeneratedColor(input.fill, element.fill);
+    element.stroke = input.stroke === "transparent" ? "transparent" : cleanGeneratedColor(input.stroke, element.stroke);
+    element.strokeWidth = clamp(input.strokeWidth ?? element.strokeWidth, 0, 12);
+    if (type === "text") {
+      element.text = String(input.text || "").slice(0, 900);
+      element.color = cleanGeneratedColor(input.color, "#171321");
+      element.fontSize = clamp(input.fontSize || 24, 8, 64);
+      element.fontFamily = String(input.fontFamily || "Inter, Arial, sans-serif").slice(0, 80);
+      element.fontWeight = clamp(input.fontWeight || 600, 300, 900);
+      element.fontStyle = input.fontStyle === "italic" ? "italic" : "normal";
+    }
+    if (type === "image") {
+      element.url = String(input.url || "").slice(0, 1200);
+      if (!element.url) return null;
+    }
+    if (type === "icon") {
+      element.url = flatIconDataUrl(input.icon || input.name || "target", input.color || input.fill || "#451dc7", input.background || "#f5f4f9");
+      element.fill = "transparent";
+      element.stroke = "transparent";
+    }
+    return element;
+  }
+
+  function flatIconDataUrl(name, color = "#451dc7", background = "#f5f4f9") {
+    const fg = cleanGeneratedColor(color, "#451dc7");
+    const bg = background === "transparent" ? "transparent" : cleanGeneratedColor(background, "#f5f4f9");
+    const icon = String(name || "target").toLowerCase().replace(/[^a-z0-9-]/g, "");
+    const paths = {
+      shield: `<path d="M64 16l36 12v28c0 28-15 48-36 58-21-10-36-30-36-58V28l36-12z"/><path d="M50 64l10 10 22-26" fill="none" stroke="#fff" stroke-width="9" stroke-linecap="round" stroke-linejoin="round"/>`,
+      lock: `<rect x="32" y="56" width="64" height="48" rx="10"/><path d="M44 56V43c0-16 10-27 20-27s20 11 20 27v13" fill="none" stroke="${fg}" stroke-width="12" stroke-linecap="round"/><circle cx="64" cy="80" r="6" fill="#fff"/>`,
+      cloud: `<path d="M36 92h54c15 0 26-10 26-24 0-13-10-23-23-24C88 28 76 20 61 20 43 20 29 33 27 51 16 55 10 63 10 74c0 11 10 18 26 18z"/>`,
+      user: `<circle cx="64" cy="42" r="22"/><path d="M22 108c5-25 22-38 42-38s37 13 42 38z"/>`,
+      chart: `<path d="M18 104h92v10H18z"/><rect x="28" y="64" width="16" height="34" rx="4"/><rect x="56" y="38" width="16" height="60" rx="4"/><rect x="84" y="22" width="16" height="76" rx="4"/>`,
+      factory: `<path d="M18 106V54l26 18V54l26 18V42h38v64z"/><path d="M82 42V22h20v20z" opacity=".75"/><path d="M34 84h14M58 84h14M82 84h14" stroke="#fff" stroke-width="6" stroke-linecap="round"/>`,
+      car: `<path d="M24 72l10-26h60l10 26v24H24z"/><circle cx="44" cy="98" r="10" fill="#fff"/><circle cx="84" cy="98" r="10" fill="#fff"/><path d="M40 52h48l6 17H34z" fill="#fff" opacity=".55"/>`,
+      server: `<rect x="24" y="22" width="80" height="28" rx="6"/><rect x="24" y="58" width="80" height="28" rx="6"/><rect x="24" y="94" width="80" height="18" rx="6"/><circle cx="42" cy="36" r="4" fill="#fff"/><circle cx="42" cy="72" r="4" fill="#fff"/>`,
+      ai: `<rect x="30" y="30" width="68" height="68" rx="14"/><path d="M64 10v20M64 98v20M10 64h20M98 64h20M26 26L14 14M102 26l12-12M26 102l-12 12M102 102l12 12" stroke="${fg}" stroke-width="8" stroke-linecap="round"/><path d="M48 78l10-30h12l10 30M54 68h20" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>`,
+      warning: `<path d="M64 18l52 92H12z"/><path d="M64 48v30" stroke="#fff" stroke-width="9" stroke-linecap="round"/><circle cx="64" cy="92" r="5" fill="#fff"/>`,
+      check: `<circle cx="64" cy="64" r="48"/><path d="M41 65l15 15 34-37" fill="none" stroke="#fff" stroke-width="10" stroke-linecap="round" stroke-linejoin="round"/>`,
+      target: `<circle cx="64" cy="64" r="48"/><circle cx="64" cy="64" r="28" fill="#fff" opacity=".75"/><circle cx="64" cy="64" r="11"/>`,
+      globe: `<circle cx="64" cy="64" r="48"/><path d="M18 64h92M64 16c16 13 24 29 24 48s-8 35-24 48M64 16C48 29 40 45 40 64s8 35 24 48" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round"/>`
+    };
+    const markup = `<svg xmlns="http://www.w3.org/2000/svg" width="128" height="128" viewBox="0 0 128 128"><rect width="128" height="128" rx="24" fill="${bg}"/><g fill="${fg}">${paths[icon] || paths.target}</g></svg>`;
+    return `data:image/svg+xml;base64,${btoa(unescape(encodeURIComponent(markup)))}`;
   }
 
   function seedDeckIfNeeded() {
@@ -452,31 +573,82 @@
     state.create.loading = true;
     addLog("User", state.create.brief);
     render();
-    const systemPrompt = `You are MagicSlider, a senior presentation designer.
-Create editable PowerPoint-like HTML slides. Return only strict JSON.
+    const systemPrompt = `You are MagicSlider, a senior Wavestone-grade presentation designer and strategy consultant.
+Your job is to create a board-level, CTI.html-quality 16:9 deck, not a bullet dump.
+Return only strict JSON. No markdown fences. No comments.
+
+Canvas and rendering contract:
+- Each slide is a 960 x 540 absolute-positioned canvas.
+- Prefer rich editable "elements" over generic templates.
+- Use only these element types: text, rect, ellipse, line, image, photo, icon.
+- Coordinates are pixels: x, y, w, h. Keep every element inside the canvas.
+- Layering uses z. Background shape/photo first, titles and icons above.
+- Text must fit its box. Use short executive copy, never paragraphs.
+- Available flat icons: shield, lock, cloud, user, chart, factory, car, server, ai, warning, check, target, globe.
+- Use photo/image elements with real URLs when a hero or evidence visual improves the slide.
+- Use flat icon elements for frameworks, risks, capabilities, value streams and timelines.
+
 The JSON shape must be:
 {
   "title": "deck title",
   "slides": [
     {
-      "template": "title|section|bullets|two-column|image",
-      "title": "short slide title",
+      "template": "title|section|bullets|two-column|metrics|cards|image",
+      "title": "short action-title",
       "subtitle": "optional short subtitle",
-      "bullets": ["up to 6 concise bullets"],
+      "takeaway": "one sentence executive implication",
+      "bullets": ["optional concise bullets"],
+      "metrics": [{"value":"35%","label":"short quantified point"}],
+      "cards": [{"title":"short card title","body":"short insight"}],
+      "elements": [
+        {"type":"rect","x":0,"y":0,"w":960,"h":540,"fill":"#ffffff","stroke":"transparent","z":1},
+        {"type":"text","x":54,"y":42,"w":760,"h":58,"text":"Action-title, not a label","color":"#451dc7","fontSize":34,"fontWeight":800,"z":10},
+        {"type":"icon","icon":"shield","x":804,"y":42,"w":72,"h":72,"color":"#451dc7","background":"#f5f4f9","z":11},
+        {"type":"photo","url":"https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80","x":600,"y":130,"w":300,"h":250,"z":3}
+      ],
       "notes": "speaker notes or design rationale"
     }
   ]
 }
+
+Quality bar:
+- Build a coherent storyline: opener, current state/evidence, diagnosis, implications, recommendations/roadmap, close.
+- Each slide needs one dominant idea and a visible hierarchy: title, evidence, interpretation, implication.
+- At least one third of the deck should use a photo or strong visual panel.
+- Every non-photo slide should use 1 to 4 flat icons or pictograms.
+- Include quantified claims when reasonable; if exact facts are unknown, frame them as estimates or illustrative signals.
+- Avoid generic filler: no "Introduction", "Overview", "Conclusion", "Key points" as titles.
+- Avoid more than 35 words per slide unless it is a deliberate dense executive summary.
+- Use Wavestone visual language when requested: white space, deep indigo, acid green accents, compact cards, confident action titles.
+- For Dark Cyber: dark backgrounds, neon green/cyan accents, threat-map feel, but keep executive readability.
+
 Rules:
 - Generate exactly ${state.create.slideCount} slides.
 - Use the requested topic and infer missing details.
-- Keep text concise enough to fit a 16:9 slide.
-- Prefer executive consulting style for Wavestone and technical contrast for Dark Cyber.
+- Mix slide archetypes: hero photo, metric dashboard, 2-column comparison, risk/capability cards, timeline/roadmap, closing recommendation.
 - Do not include markdown fences.`;
-    const userPrompt = `Deck brief:\n${state.create.brief}\n\nGraphic style: ${STYLE_PRESETS[state.create.style]?.label || "Custom"}\nCustom CSS or visual constraints:\n${state.create.customCss || "None"}`;
-    addLog("System", systemPrompt.slice(0, 900) + "...");
+    const photoLibrary = [
+      "Cyber operations / SOC: https://images.unsplash.com/photo-1550751827-4bd374c3f58b?auto=format&fit=crop&w=1200&q=80",
+      "Technology / circuits: https://images.unsplash.com/photo-1518770660439-4636190af475?auto=format&fit=crop&w=1200&q=80",
+      "Executive teamwork: https://images.unsplash.com/photo-1551434678-e076c223a692?auto=format&fit=crop&w=1200&q=80",
+      "Workshop / collaboration: https://images.unsplash.com/photo-1517048676732-d65bc937f952?auto=format&fit=crop&w=1200&q=80",
+      "Office / boardroom: https://images.unsplash.com/photo-1497366811353-6870744d04b2?auto=format&fit=crop&w=1200&q=80",
+      "Mobility / automotive: https://images.unsplash.com/photo-1503376780353-7e6692767b70?auto=format&fit=crop&w=1200&q=80",
+      "Cloud / data center: https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=1200&q=80",
+      "Industry / factory: https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?auto=format&fit=crop&w=1200&q=80"
+    ].join("\n");
+    const userPrompt = `Deck brief:\n${state.create.brief}
+
+Graphic style: ${STYLE_PRESETS[state.create.style]?.label || "Custom"}
+Custom CSS or visual constraints:\n${state.create.customCss || "None"}
+
+Use these photo URLs when relevant; do not invent image URLs if one of these fits:
+${photoLibrary}
+
+Expected output: a polished executive deck with real visual composition, photos where useful, and flat icons.`;
+    addLog("System", systemPrompt.slice(0, 1200) + "...");
     try {
-      const result = await llmGenerate(systemPrompt, userPrompt, 6500);
+      const result = await llmGenerate(systemPrompt, userPrompt, Math.min(16000, Math.max(8000, state.create.slideCount * 1700)));
       addLog("Assistant", JSON.stringify(result, null, 2));
       const slides = (result.slides || []).slice(0, state.create.slideCount).map((item) => makeSlide(item.template || "bullets", item));
       if (!slides.length) throw new Error("The model returned no slides.");
@@ -782,7 +954,7 @@ Return {"name":"short name","css":"valid CSS only, scoped to .ms-slide and desce
                 </select>
               </label>
               <button class="btn primary full" data-action="export-pptx">Export PPTX</button>
-              <p class="helper">Chaque slide HTML est capturee en PNG puis placee plein format dans PowerPoint. Les photos externes doivent autoriser le chargement navigateur.</p>
+              <p class="helper">Les textes, formes et lignes sont reconstruits comme objets PowerPoint editables. Les photos et icones SVG sont capturees en haute qualite.</p>
             </div>
             <div class="export-card">
               <h3>HTML autonome</h3>
