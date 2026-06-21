@@ -40,11 +40,11 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
   grid-template-rows: 72px minmax(0, 1fr);
 }
 .topbar {
-  display: grid;
-  grid-template-columns: auto minmax(0, 1fr) auto;
+  display: flex;
   align-items: center;
-  gap: 16px;
-  padding: 0 20px;
+  gap: 12px;
+  min-height: 72px;
+  padding: 0 14px;
   background: linear-gradient(120deg, #0b2f4a 0%, #0f6d8f 58%, #30c38f 140%);
   color: #fff;
   border-bottom: 1px solid rgba(255,255,255,0.14);
@@ -56,7 +56,9 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
   display: flex;
   align-items: center;
   gap: 11px;
-  min-width: 190px;
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 .brand-mark {
   width: 42px;
@@ -71,17 +73,18 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
   letter-spacing: 0;
   box-shadow: inset 0 1px 0 rgba(255,255,255,0.14);
 }
-.brand-title { font-weight: 750; letter-spacing: 0; color: rgba(255,255,255,0.96); }
+.brand-title { display: block; font-weight: 750; letter-spacing: 0; color: rgba(255,255,255,0.96); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .brand-sub { display: block; color: rgba(255,255,255,0.74); font-size: 11px; margin-top: 1px; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase; }
 .tabbar {
   display: flex;
   align-items: center;
   gap: 0;
   height: 72px;
+  flex: 0 0 auto;
 }
 .tab {
   height: 72px;
-  min-width: 82px;
+  min-width: 72px;
   padding: 0 14px;
   border: 1px solid transparent;
   border-bottom: 3px solid transparent;
@@ -92,7 +95,25 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
   font-weight: 650;
   text-transform: uppercase;
   letter-spacing: 0.05em;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
   transition: color 0.15s, background 0.15s, border-color 0.15s;
+}
+.tab svg {
+  width: 22px;
+  height: 22px;
+  fill: none;
+  stroke: currentColor;
+  stroke-width: 2;
+  stroke-linecap: round;
+  stroke-linejoin: round;
+}
+.tab span {
+  font-size: 10px;
+  line-height: 1;
 }
 .tab:hover { background: rgba(255,255,255,0.08); color: #fff; }
 .tab.active {
@@ -112,6 +133,7 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
   color: rgba(255,255,255,0.88);
   font-size: 12px;
   font-weight: 650;
+  flex: 0 1 auto;
 }
 .status-dot {
   width: 8px;
@@ -612,29 +634,21 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
     position: sticky;
     top: 0;
     z-index: 20;
-    grid-template-columns: 1fr;
-    height: auto;
-    padding: 10px 12px 8px;
-    gap: 10px;
+    min-height: 56px;
+    height: 56px;
+    padding: 0 6px;
+    gap: 4px;
+    flex-wrap: nowrap;
   }
   .brand {
-    min-width: 0;
-  }
-  .brand-mark {
-    width: 30px;
-    height: 30px;
-  }
-  .brand-title {
-    font-size: 14px;
-  }
-  .brand-sub {
-    font-size: 10px;
+    display: none;
   }
   .tabbar {
     width: 100%;
-    height: 38px;
+    height: 56px;
+    flex: 1 1 auto;
     overflow-x: auto;
-    padding-bottom: 2px;
+    justify-content: flex-start;
     scrollbar-width: none;
     -webkit-overflow-scrolling: touch;
   }
@@ -643,14 +657,26 @@ button:disabled { cursor: not-allowed; opacity: 0.6; }
   }
   .tab {
     flex: 0 0 auto;
-    min-width: 74px;
-    height: 34px;
-    padding: 0 10px;
+    min-width: 56px;
+    height: 56px;
+    padding: 0 12px;
     font-size: 11px;
-    border-radius: 10px;
+    border-radius: 0;
     border-bottom-width: 0;
+    gap: 0;
   }
-  .tab.active { background: var(--app-accent); color: #0b2f4a; }
+  .tab svg {
+    width: 22px;
+    height: 22px;
+  }
+  .tab span {
+    display: none;
+  }
+  .tab.active {
+    background: rgba(255,255,255,0.12);
+    color: #fff;
+    box-shadow: inset 0 -3px 0 var(--app-accent);
+  }
   .provider-pill { display: none; }
   .workspace, .workspace.modify, .workspace.export, .workspace.settings {
     grid-template-columns: 1fr;

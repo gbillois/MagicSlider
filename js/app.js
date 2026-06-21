@@ -753,13 +753,13 @@ Return {"name":"short name","css":"valid CSS only, scoped to .ms-slide and desce
     app.innerHTML = `
       <style id="deck-style">${getStyleCss()}</style>
       <header class="topbar">
-        <div class="brand"><div class="brand-mark">MS</div><div><span class="brand-title">MagicSlider</span><span class="brand-sub">HTML slides studio</span></div></div>
-        <nav class="tabbar">
-          ${tabButton("create", "Create")}
-          ${tabButton("modify", "Modify")}
-          ${tabButton("export", "Export")}
-          ${tabButton("settings", "Settings")}
+        <nav class="tabbar" aria-label="Main navigation">
+          ${tabButton("create", "Create", svgFolder())}
+          ${tabButton("modify", "Modify", svgPen())}
+          ${tabButton("export", "Export", svgSave())}
+          ${tabButton("settings", "Settings", svgGear())}
         </nav>
+        <div class="brand"><div class="brand-mark">MS</div><div><span class="brand-title">MagicSlider</span><span class="brand-sub">HTML slides studio</span></div></div>
         <div class="provider-pill"><span class="status-dot ${isAIReady() ? "ok" : "warn"}"></span><span>${escapeHtml(providerSummary())}</span></div>
       </header>
       ${state.activeTab === "create" ? renderCreateTab() : ""}
@@ -769,8 +769,24 @@ Return {"name":"short name","css":"valid CSS only, scoped to .ms-slide and desce
     `;
   }
 
-  function tabButton(id, label) {
-    return `<button class="tab ${state.activeTab === id ? "active" : ""}" data-action="tab" data-tab="${id}">${label}</button>`;
+  function tabButton(id, label, icon) {
+    return `<button class="tab ${state.activeTab === id ? "active" : ""}" data-action="tab" data-tab="${id}" title="${escapeAttr(label)}" aria-label="${escapeAttr(label)}">${icon}<span>${escapeHtml(label)}</span></button>`;
+  }
+
+  function svgFolder() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>';
+  }
+
+  function svgPen() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 20h9"></path><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4 12.5-12.5z"></path></svg>';
+  }
+
+  function svgSave() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>';
+  }
+
+  function svgGear() {
+    return '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>';
   }
 
   function renderCreateTab() {
