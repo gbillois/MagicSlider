@@ -12,6 +12,7 @@
   const DEFAULT_MODELS = {
     anthropic: ["claude-sonnet-4-20250514"],
     openai: ["gpt-5.2", "gpt-5", "gpt-5-mini", "gpt-5-nano", "o3", "o4-mini", "o3-mini", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "gpt-4o", "gpt-4o-mini"],
+    openrouter: ["openrouter/auto", "~openai/gpt-latest", "anthropic/claude-sonnet-4.6", "google/gemini-2.5-pro"],
     azure_openai: ["gpt-5.2", "gpt-5", "gpt-5-mini", "gpt-5-nano", "o3", "o4-mini", "o3-mini", "gpt-4.1", "gpt-4.1-mini", "gpt-4.1-nano", "gpt-4o", "gpt-4o-mini"],
     google_gemini: ["gemini-2.5-flash", "gemini-2.5-pro", "gemini-2.0-flash", "gemini-2.0-flash-lite"],
     mistral: ["mistral-large-latest", "mistral-medium-latest", "mistral-small-latest"]
@@ -180,7 +181,7 @@
   function providerSummary() {
     const s = state.settings;
     if (s.ai_provider === "azure_openai") return `Azure OpenAI / ${s.azure_deployment || "deployment not set"}`;
-    const labels = { anthropic: "Anthropic", openai: "OpenAI", google_gemini: "Google Gemini", mistral: "Mistral" };
+    const labels = { anthropic: "Anthropic", openai: "OpenAI", openrouter: "OpenRouter", google_gemini: "Google Gemini", mistral: "Mistral" };
     return `${labels[s.ai_provider] || s.ai_provider} / ${s.ai_model || "model not set"}`;
   }
 
@@ -268,8 +269,8 @@
         response = await fetch("https://api.anthropic.com/v1/models?limit=100", {
           headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "anthropic-dangerous-direct-browser-access": "true" }
         });
-      } else if (provider === "openai") {
-        response = await fetch("https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${key}` } });
+      } else if (provider === "openai" || provider === "openrouter") {
+        response = await fetch(provider === "openrouter" ? "https://openrouter.ai/api/v1/models" : "https://api.openai.com/v1/models", { headers: { Authorization: `Bearer ${key}` } });
       } else if (provider === "google_gemini") {
         response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models?key=${encodeURIComponent(key)}`);
       } else if (provider === "mistral") {
@@ -280,6 +281,8 @@
       let models = [];
       if (provider === "openai") {
         models = (data.data || []).map((m) => m.id).filter((id) => /^(gpt-|o\d|chatgpt)/.test(id)).filter((id) => !/(audio|realtime|search|transcribe|tts|embed|image|moderation|instruct)/i.test(id));
+      } else if (provider === "openrouter") {
+        models = (data.data || []).filter((m) => !m.architecture?.output_modalities || m.architecture.output_modalities.includes("text")).map((m) => m.id);
       } else if (provider === "google_gemini") {
         models = (data.models || []).filter((m) => m.supportedGenerationMethods?.includes("generateContent")).map((m) => String(m.name || "").replace(/^models\//, ""));
       } else if (provider === "mistral") {
@@ -328,6 +331,16 @@
       });
       const data = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(data.error?.message || `OpenAI HTTP ${response.status}`);
+      return data.choices?.[0]?.message?.content || "";
+    }
+    if (s.ai_provider === "openrouter") {
+      const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${s.ai_api_key}`, "HTTP-Referer": location.origin, "X-OpenRouter-Title": "MagicSlider" },
+        body: JSON.stringify({ model: s.ai_model, messages: [{ role: "user", content: userPrompt }], max_tokens: maxTokens })
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(data.error?.message || `OpenRouter HTTP ${response.status}`);
       return data.choices?.[0]?.message?.content || "";
     }
     if (s.ai_provider === "mistral") {
@@ -658,6 +671,7 @@ ${state.create.brandPrompt}`, 2600);
                 <select data-bind-settings="ai_provider">
                   <option value="anthropic" ${s.ai_provider === "anthropic" ? "selected" : ""}>Anthropic</option>
                   <option value="openai" ${s.ai_provider === "openai" ? "selected" : ""}>OpenAI</option>
+                  <option value="openrouter" ${s.ai_provider === "openrouter" ? "selected" : ""}>OpenRouter</option>
                   <option value="azure_openai" ${s.ai_provider === "azure_openai" ? "selected" : ""}>Azure OpenAI</option>
                   <option value="google_gemini" ${s.ai_provider === "google_gemini" ? "selected" : ""}>Google Gemini</option>
                   <option value="mistral" ${s.ai_provider === "mistral" ? "selected" : ""}>Mistral</option>
